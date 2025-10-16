@@ -20,24 +20,35 @@ export default class Slide {
   }
 
   onStart(event) {
-    event.preventDefault();
-    this.dist.startX = event.clientX;
-    this.wrapper.addEventListener('mousemove', this.onMove);
+    let movetype;
+    if (event.type ==='mousedown') {
+      event.preventDefault();
+      this.dist.startX = event.clientX;
+      movetype = 'mousemove';
+    } else {
+      this.dist.startX = event.changedTouches[0].clientX;
+      movetype = 'touchmove'
+    } 
+    this.wrapper.addEventListener(movetype, this.onMove, {passive: true});
   }
 
   onMove(event) {
-    const finalPosition = this.updatePosition(event.clientX);
+    const pointerPOsition = (event.type === 'mousemove') ? event.clientX : event.changedTouches[0].clientX;
+    const finalPosition = this.updatePosition(pointerPOsition);
     this.moveSlide(finalPosition)
   }
 
   onEnd(event) {
-    this.wrapper.removeEventListener('mousemove', this.onMove);
+    const moveType = (event.type === 'mouseup') ? 'movetype' : 'touchmove';
+    this.wrapper.removeEventListener(moveType, this.onMove, {passive: true});
     this.dist.finalPosition = this.dist.movePosition;
   }
 
   addSlideEvents() {
     this.wrapper.addEventListener('mousedown', this.onStart);
+    this.wrapper.addEventListener('touchstart', this.onStart, {passive: true});
     this.wrapper.addEventListener('mouseup', this.onEnd);
+    this.wrapper.addEventListener('touchend', this.onEnd, {passive: true});
     
   }
 
